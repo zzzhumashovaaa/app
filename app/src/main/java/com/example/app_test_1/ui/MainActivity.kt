@@ -1,32 +1,45 @@
 package com.example.app_test_1.ui
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.material3.Text
-import androidx.lifecycle.ViewModelProvider
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import com.example.app_test_1.R
 import com.example.app_test_1.viewmodel.MainViewModel
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 
+class MainActivity : AppCompatActivity() {
 
-class MainActivity : ComponentActivity() {
+    private val viewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-        val viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        val amountInput = findViewById<EditText>(R.id.amountInput)
+        val discountInput = findViewById<EditText>(R.id.discountInput)
+        val calcButton = findViewById<Button>(R.id.calcButton)
+        val resultText = findViewById<TextView>(R.id.resultText)
+        val errorText = findViewById<TextView>(R.id.errorText)
 
-        setContent {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = viewModel.message)
+        viewModel.state.observe(this) { state ->
+            if (state.errorText.isNotBlank()) {
+                errorText.visibility = android.view.View.VISIBLE
+                resultText.visibility = android.view.View.GONE
+                errorText.text = state.errorText
+            } else {
+                errorText.visibility = android.view.View.GONE
+                resultText.visibility = android.view.View.VISIBLE
+                resultText.text = state.resultText
             }
         }
 
+        calcButton.setOnClickListener {
+            viewModel.calculate(
+                amountStr = amountInput.text.toString(),
+                discountStr = discountInput.text.toString()
+            )
+        }
     }
 }
